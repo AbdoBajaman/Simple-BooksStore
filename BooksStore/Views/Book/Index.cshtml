@@ -1,0 +1,70 @@
+﻿@model IEnumerable<BooksStore.Models.Book>;
+@{
+    ViewData["Title"] = "Book List";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<!-- Bootstrap Table -->
+@if (TempData["Created"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Created"]
+    </div>
+}
+@if (TempData["Updated"] != null)
+{
+    <div class="alert alert-Info">
+        @TempData["Updated"]
+    </div>
+}
+@if (TempData["Deleted"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Deleted"]
+    </div>
+}
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a class="btn btn-primary" asp-action="Create">Create Book</a>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Id)</th>
+                <th>@Html.DisplayNameFor(model => model.Title)</th>
+                <th>@Html.DisplayNameFor(model => model.Description)</th>
+
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Book in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(model => Book.Id)</td>
+                    <td>@Html.DisplayFor(model => Book.Title)</td>
+                    <td>@Html.DisplayFor(model => Book.Description)</td>
+                 
+              
+
+                    <td>
+                        <!-- Action Links styled as buttons -->
+                    @Html.ActionLink("Details", "Details", new { id = Book.Id }, new { @class = "btn btn-info btn-sm" }) |
+
+                        @Html.ActionLink("Edit", "Edit", new { id = Book.Id }, new { @class = "btn btn-warning btn-sm" }) |
+
+                        <form asp-action="Delete" asp-route-id="@Book.Id" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

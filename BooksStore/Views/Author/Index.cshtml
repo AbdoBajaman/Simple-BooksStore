@@ -1,0 +1,65 @@
+﻿@model IEnumerable<BooksStore.Models.Author>
+
+@{
+    ViewData["Title"] = "Author List";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<!-- Bootstrap Table -->
+@if (TempData["Created"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Created"]
+    </div>
+}
+@if (TempData["Updated"] != null)
+{
+    <div class="alert alert-Info">
+        @TempData["Updated"]
+    </div>
+}
+@if (TempData["Deleted"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Deleted"]
+    </div>
+}
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a class="btn btn-primary" asp-action="Create">Create Author</a>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Id)</th>
+                <th>@Html.DisplayNameFor(model => model.FullName)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var author in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(model => author.Id)</td>
+                    <td>@Html.DisplayFor(model => author.FullName)</td>
+                    <td>
+                        <!-- Action Links styled as buttons -->
+                    @Html.ActionLink("Details", "Details", new { id = author.Id }, new { @class = "btn btn-info btn-sm" }) |
+
+                        @Html.ActionLink("Edit", "Edit", new { id = author.Id }, new { @class = "btn btn-warning btn-sm" }) |
+
+                        <form asp-action="Delete" asp-route-id="@author.Id" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

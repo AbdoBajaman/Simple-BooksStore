@@ -1,0 +1,47 @@
+﻿@model BooksStore.ViewModels.BookAuthorViewModel
+@{
+    ViewData["Title"] = "Edit Author";
+    //var authors = ViewBag["authors"] as IEnumerator<BooksStore.ViewModels.BookAuthorViewModel>; // No need for brackets
+
+}
+
+<h1 class="text-center mb-4">Create Author</h1>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title">Author Details</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-route-id = "@Model.BookId" method="post">
+                        <div class="form-group mb-3">
+                            <label for="Title" class="form-label">Title</label>
+                            <input asp-for="Title" type="text" class="form-control" id="Title" name="Title" required />
+
+                            <label for="Description" class="form-label">Title</label>
+                            <input asp-for="Description" type="text" class="form-control" id="Description" name="Description" required />
+
+                            <div class="form-group">
+                                <label for="AuthorId">Author</label>
+                                <select asp-for="AuthorId" asp-items="ViewBag.Authors" class="form-control">
+                                </select>
+
+
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide the full name of the author.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-info">Update Author</button>
+                            <a href="@Url.Action("Index", "Book")" class="btn btn-outline-info">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
