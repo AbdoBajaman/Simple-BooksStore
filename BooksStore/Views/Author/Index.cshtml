@@ -1,65 +1,51 @@
 ﻿@model IEnumerable<BooksStore.Models.Author>
 
 @{
-    ViewData["Title"] = "Author List";
+    ViewData["Title"] = "Index";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h2 class="text-center mb-4">Authors List</h2>
 
-<!-- Bootstrap Table -->
-@if (TempData["Created"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Created"]
-    </div>
-}
-@if (TempData["Updated"] != null)
-{
-    <div class="alert alert-Info">
-        @TempData["Updated"]
-    </div>
-}
-@if (TempData["Deleted"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Deleted"]
-    </div>
-}
-<div class="container">
-    <div class="row mb-3">
-        <div class="col-12">
-            <a class="btn btn-primary" asp-action="Create">Create Author</a>
-        </div>
-    </div>
+<p>
+    <a asp-action="Create" class="btn btn-primary btn-lg">Create New Author</a>
+</p>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>@Html.DisplayNameFor(model => model.Id)</th>
-                <th>@Html.DisplayNameFor(model => model.FullName)</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var author in Model)
-            {
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="card-title">Authors</h4>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="thead-dark">
                 <tr>
-                    <td>@Html.DisplayFor(model => author.Id)</td>
-                    <td>@Html.DisplayFor(model => author.FullName)</td>
-                    <td>
-                        <!-- Action Links styled as buttons -->
-                    @Html.ActionLink("Details", "Details", new { id = author.Id }, new { @class = "btn btn-info btn-sm" }) |
-
-                        @Html.ActionLink("Edit", "Edit", new { id = author.Id }, new { @class = "btn btn-warning btn-sm" }) |
-
-                        <form asp-action="Delete" asp-route-id="@author.Id" method="post" style="display:inline;">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-
+                    <th>
+                        @Html.DisplayNameFor(model => model.Id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.FullName)
+                    </th>
+                    <th class="text-center">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FullName)
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Edit" class="btn btn-outline-warning btn-sm" asp-route-id="@item.Id">Edit</a>
+                            <a asp-action="Details" class="btn btn-outline-info btn-sm" asp-route-id="@item.Id">Details</a>
+                            <a asp-action="Delete" class="btn btn-outline-danger btn-sm" asp-route-id="@item.Id">Delete</a>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

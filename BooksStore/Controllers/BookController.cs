@@ -1,180 +1,239 @@
-﻿using BooksStore.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using BooksStore.Models;
 using BooksStore.Models.ReposteryPattern;
 using BooksStore.ViewModels;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace BooksStore.Controllers
+
+namespace Bookstore.Controllers
 {
     public class BookController : Controller
     {
-        private readonly IBookStoreRepostery<Book> _BookRepostery;
+        private readonly IBookStoreRepostery<Book> bookRepository;
+        private readonly IBookStoreRepostery<Author> authorRepository;
+        private readonly IWebHostEnvironment hosting;
 
-        private readonly IBookStoreRepostery<Author> _AuthorRepostry;
-        public BookController(IBookStoreRepostery<Book> book,IBookStoreRepostery<Author> author)
+        public BookController(IBookStoreRepostery<Book> bookRepository,
+            IBookStoreRepostery<Author> authorRepository,
+            IWebHostEnvironment hosting)
         {
-
-            _BookRepostery = book;
-            _AuthorRepostry = author;
+            this.bookRepository = bookRepository;
+            this.authorRepository = authorRepository;
+            this.hosting = hosting;
         }
-        // GET: BookController
+        // GET: Book
         public ActionResult Index()
         {
-            var books= _BookRepostery.List();
-
+            var books = bookRepository.List();
             return View(books);
         }
 
-    
-
-        // GET: BookController/Details/5
+        // GET: Book/Details/5
         public ActionResult Details(int id)
         {
-            
-            var book = _BookRepostery.Find(id);
+            var book = bookRepository.Find(id);
+
             return View(book);
         }
 
-        // GET: BookController/Create
+        // GET: Book/Create
         public ActionResult Create()
         {
-            var authors = _AuthorRepostry.List();
             var model = new BookAuthorViewModel
             {
-                authors =  _AuthorRepostry.List().ToList(),
-
-
-        };
-
-            //ViewBag.Author = new SelectList(authors, "Id", "FullName");
-            ViewBag.Author = model;
-
+                Authors = FillSelectList()
+            };
 
             return View(model);
         }
 
-        // POST: BookController/Create
+        // POST: Book/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(BookAuthorViewModel model)
         {
-            //return Content("Book auhor id :" + book.AuthorId);
-            var bookId = _BookRepostery.List().Max(p => p.Id) + 1;
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    string fileName = UploadFile(model.File) ?? string.Empty;
 
+                    if (model.AuthorId == -1)
+                    {
+                        ViewBag.Message = "Please select an author from the list!";
+
+                        return View(GetAllAuthors());
+                    }
+
+                    var author = authorRepository.Find(model.AuthorId);
+                    Book book = new Book
+                    {
+                        Id = model.BookId,
+                        Title = model.Title,
+                        Description = model.Description,
+                        Author = author,
+                        ImageUrl = fileName
+                    };
+
+                    bookRepository.Create(book);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch
+                {
+                    return View();
+                }
+            }
+
+
+            ModelState.AddModelError("", "You have to fill all the required fields!");
+            return View(GetAllAuthors());
+        }
+
+        // GET: Book/Edit/5
+        public ActionResult Edit(int id)
+        {
+            var book = bookRepository.Find(id);
+            var authorId = book.Author == null ? book.Author.Id = 0 : book.Author.Id;
+
+            var viewModel = new BookAuthorViewModel
+            {
+                BookId = book.Id,
+                Title = book.Title,
+                Description = book.Description,
+                AuthorId = authorId,
+                Authors = authorRepository.List().ToList(),
+                ImageUrl = book.ImageUrl
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: Book/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(BookAuthorViewModel viewModel)
+        {
             try
             {
-                var author = _AuthorRepostry.Find(model.AuthorId);
-                Book book=new Book()
-                {
-                    Id = bookId,
-                    Title = model.Title,
-                    Description = model.Description,
-                    AuthorId = model.AuthorId,
-                    Author = author
-                };
-                // book.Id = _BookRepostery.List().Max(p=>p.Id) + 1;
+                // TODO: Add update logic here
+                string fileName = UploadFile(viewModel.File, viewModel.ImageUrl);
 
-                _BookRepostery.Create(book);
+                var author = authorRepository.Find(viewModel.AuthorId);
+                Book book = new Book
+                {
+                    Id=viewModel.BookId,
+                    Title = viewModel.Title,
+                    Description = viewModel.Description,
+                    Author = author,
+                    ImageUrl = fileName
+                };
+
+                bookRepository.Update(viewModel.BookId, book);
+
+                return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception)
             {
                 return View();
             }
-            return RedirectToAction("Index");
         }
 
-        // GET: BookController/Edit/5
-        public ActionResult Edit(int id)
+        // GET: Book/Delete/5
+        public ActionResult Delete(int id)
         {
-            var book = _BookRepostery.Find(id);
-            var model = new BookAuthorViewModel
-            {
-                BookId = book.Id,
-                AuthorId = book.Author?.Id ?? 0, 
-                Title = book.Title,
-                Description = book.Description,
-                authors = _AuthorRepostry.List().ToList(),
+            var book = bookRepository.Find(id);
 
-
-            };
-            ViewBag.Authors = new SelectList(model.authors, "Id", "FullName");
-            return View(model);
+            return View(book);
         }
 
-        // POST: BookController/Edit/5
+        // POST: Book/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, BookAuthorViewModel Author)
+        public ActionResult ConfirmDelete(int id)
         {
             try
             {
-                // Get the existing book to update
-                var author = _AuthorRepostry.Find(Author.AuthorId);
-
-                // Update the book details
-                if (author != null)
-                {
-                    Book updatedBook = new Book()
-                    {
-                        Title = Author.Title,
-                        Description = Author.Description,
-                        AuthorId =Author.AuthorId,
-                        Author = author
-                    };
-
-                    // Call the Update method
-                    _BookRepostery.Update(Author.BookId, updatedBook);
-                }
+                // TODO: Add delete logic here
+                bookRepository.Delete(id);
 
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                // Return the model back to the view in case of an error
-                return View(Author);
+                return View();
             }
         }
-        // GET: BookController/Delete/5
-        //[HttpGet]
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
 
-        // POST: BookController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id)
+        List<Author> FillSelectList()
         {
-            // Find the book by ID
-            var book = _BookRepostery.Find(id);
+            var authors = authorRepository.List().ToList();
+            authors.Insert(0, new Author { Id = -1, FullName = "--- Please select an author ---" });
 
-            // If the book is not found, return a NotFound view or an appropriate response
-            if (book == null)
-            {
-                return NotFound(); // Return a 404 error if the book is not found
-            }
-
-            try
-            {
-                // Attempt to delete the book
-                _BookRepostery.Delete(book.Id);
-                // Optionally, you could display a success message here if needed
-            }
-            catch (Exception ex) // Catch specific exceptions if needed
-            {
-                // Log the exception (optional)
-                // You can use a logging framework to log the error
-
-                // Return the view with an error message
-                TempData["FailDeleted"] = "An error occurred while trying to delete the book.";
-                return View(book); // Return the book details back to the view
-            }
-
-            TempData["Deleted"] = "Book Deleted Successfully";
-            // Redirect to the Index action after successful deletion
-            return RedirectToAction("Index");
+            return authors;
         }
+
+        BookAuthorViewModel GetAllAuthors()
+        {
+            var vmodel = new BookAuthorViewModel
+            {
+                Authors = FillSelectList()
+            };
+
+            return vmodel;
+        }
+
+        string UploadFile(IFormFile file)
+        {
+            if (file != null)
+            {
+                string uploads = Path.Combine(hosting.WebRootPath, "uploads");
+                if (!Directory.Exists(uploads))
+                {
+                    Directory.CreateDirectory(uploads);
+                }
+                string fullPath = Path.Combine(uploads, file.FileName);
+                file.CopyTo(new FileStream(fullPath, FileMode.Create));
+
+                return file.FileName;
+            }
+
+            return null;
+        }
+
+        string UploadFile(IFormFile file, string imageUrl)
+        {
+            if (file != null)
+            {
+                string uploads = Path.Combine(hosting.WebRootPath, "uploads");
+
+                string newPath = Path.Combine(uploads, file.FileName);
+                string oldPath = Path.Combine(uploads, imageUrl);
+
+                if (oldPath != newPath)
+                {
+                    System.IO.File.Delete(oldPath);
+                    file.CopyTo(new FileStream(newPath, FileMode.Create));
+                }
+
+                return file.FileName;
+            }
+
+            return imageUrl;
+        }
+
+        public ActionResult Search(string term)
+        {
+            var result = bookRepository.Search(term);
+
+            return View("Index", result);
+        }
+
     }
 }

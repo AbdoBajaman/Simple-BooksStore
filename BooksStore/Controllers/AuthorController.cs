@@ -1,107 +1,118 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using BooksStore.Models;
 using BooksStore.Models.ReposteryPattern;
+using Bookstore.Models;
+using Bookstore.Models.Repositories;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace BooksStore.Controllers
+namespace Bookstore.Controllers
 {
     public class AuthorController : Controller
     {
-        //cus in program we use singelton this interface implement the class Author Repo
-        private readonly IBookStoreRepostery<Author> authorRepostry;
+        private readonly IBookStoreRepostery<Author> authorRepository;
 
-        public AuthorController(IBookStoreRepostery<Author> AuthorRepostry)
+        public AuthorController(IBookStoreRepostery<Author> authorRepository)
         {
-            this.authorRepostry = AuthorRepostry;
+            this.authorRepository = authorRepository;
         }
 
-        // GET: AuthorController
-        public IActionResult Index()
+        // GET: Author
+        public ActionResult Index()
         {
-            var authors = authorRepostry.List();  // Fetch all authors
-            return View(authors);  // Return authors to view
+            var authors = authorRepository.List();
+
+            return View(authors);
         }
 
-
-        // GET: AuthorController/Create
-        public ActionResult Create()
+        // GET: Author/Details/5
+        public ActionResult Details(int id)
         {
-            
-            return View();  // Return the view for Create
-        }
+            var author = authorRepository.Find(id);
 
-        // POST: AuthorController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Author author)
-        {
-            try
-            {
-                // Manually assign the Id if it's not auto-generated
-                author.Id = authorRepostry.List().Max(a => a.Id) + 1;
-
-                // Add the new author to the repository
-                authorRepostry.Create(author);
-
-                TempData["Created"] = "Created Author successfully";
-                return RedirectToAction(nameof(Index));  // Redirect to Index after success
-            }
-            catch
-            {
-                return View();  // Return the view again if something goes wrong
-            }
-        }
-
-
-        //GET:AuthController/Details/5
-
-
-        public IActionResult Details(int id)
-        {
-            var author = authorRepostry.Find(id);
-            if (author == null)
-            {
-                return NotFound(); // Return 404 if the author is not found
-            }
-            return View(author); // Pass the author to the view
-        }
-
-        // GET: AuthorController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            var author=authorRepostry.Find(id);
             return View(author);
         }
 
-        // POST: AuthorController/Edit/5
+        // GET: Author/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Author/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Author author)
+        {
+            try
+            {
+                authorRepository.Create(author);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Author/Edit/5
+        public ActionResult Edit(int id)
+        {
+            var author = authorRepository.Find(id);
+
+            return View(author);
+        }
+
+        // POST: Author/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, Author author)
         {
-            authorRepostry.Update(id,author);
-            TempData["Updated"] = "Author updated successfully";
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                authorRepository.Update(id, author);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
         }
 
-        // GET: AuthorController/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
-
-        // POST: AuthorController/Delete/5
-        [ValidateAntiForgeryToken]
+        // GET: Author/Delete/5
         public ActionResult Delete(int id)
         {
-          
-            authorRepostry.Delete(id);
+            var author = authorRepository.Find(id);
 
-            TempData["Deleted"] = "Author deleted successfully";
-            return RedirectToAction("Index");
-
-
-          
+            return View(author);
         }
 
+        // POST: Author/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, Author author)
+        {
+            try
+            {
+                authorRepository.Delete(id);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+        public ActionResult Search(string term)
+        {
+            var result = authorRepository.Search(term);
+
+            return View("Index", result);
+        }
     }
 }

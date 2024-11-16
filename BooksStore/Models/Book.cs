@@ -17,5 +17,6 @@ namespace BooksStore.Models
 
         [ForeignKey("AuthorId")]
         public Author Author { get; set; }
+        public string ImageUrl { get; internal set; }
     }
 }
