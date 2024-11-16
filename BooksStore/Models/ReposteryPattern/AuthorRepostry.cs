@@ -68,6 +68,11 @@ namespace BooksStore.Models.ReposteryPattern
             return _authors;
         }
 
+        public List<Author> Search(string term)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Update(int Id, Author NewAuthor)
         {
            var Author=Find(Id);

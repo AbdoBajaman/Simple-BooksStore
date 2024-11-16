@@ -1,59 +1,75 @@
-﻿@*@model BooksStore.Models.Book*@
-@model BooksStore.ViewModels.BookAuthorViewModel
+﻿@model BooksStore.ViewModels.BookAuthorViewModel
 
 @{
-    ViewData["Title"] = "Create Book";
-
-
-    //var Authors = ViewBag.Author as IEnumerable<BooksStore.Models.Book>;
+    ViewData["Title"] = "Create";
 }
-@*<head>     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-    </head>*@
-<h1 class="text-center mb-4">Create Author</h1>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
+<h2 class="text-center mb-4">Create Book</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error!</strong> @ViewBag.Message
+    </div>
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title">Create Book</h5>
-                </div>
                 <div class="card-body">
-                    <form asp-action="Create" asp-route-id="@Model.AuthorId" method="post">
-                        <div asp-validation-summary="ModelOnly" class="Text-Danger"> </div>
-                        <div class="form-group mb-3">
-                            <label for="Title" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="Title" name="Title" required />
+                    <!-- Title Input -->
+                    <div class="form-group mb-3">
+                        <label asp-for="Title" class="control-label">Title</label>
+                        <input asp-for="Title" class="form-control" placeholder="Enter book title" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
 
-                            <span asp-validation-for="Title" class="Text-Danger"> </span>
+                    <!-- Description Input -->
+                    <div class="form-group mb-3">
+                        <label asp-for="Description" class="control-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter book description"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
 
+                    <!-- File Upload Input -->
+                    <div class="form-group mb-3">
+                        <label asp-for="File" class="control-label">Upload Image</label>
+                        <input type="file" name="File" asp-for="File" class="form-control" />
+                        <span asp-validation-for="File" class="text-danger"></span>
+                    </div>
 
-                            <label for="Description" class="form-label">Description</label>
-                            <input type="text" class="form-control" id="Title" name="Description" required />
-                            <span asp-validation-for="Description" class="Text-Danger"> </span>
-                            <div class="form-group">
-                                <label for="AuthorId">Author</label>
-                           @*     <select asp-for="AuthorId" asp-items="@(ViewBag.Author)" class="form-control">
-                                    <!-- Optional prompt -->
-                                </select>*@
+                    <!-- Author Selection -->
+                    <div class="form-group mb-3">
+                        <label asp-for="AuthorId" class="control-label">Select Author</label>
+                        <select asp-for="AuthorId" class="form-control">
+                            <option value="" disabled selected>Select an Author</option>
+                            @foreach (var author in Model.Authors)
+                            {
+                                <option value="@author.Id">@author.FullName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="AuthorId" class="text-danger"></span>
+                    </div>
 
-                                     <select asp-for="AuthorId" asp-items="@(new SelectList(Model.authors,"Id","FullName"))" class="form-control">
-                                    <!-- Optional prompt -->
-                                </select>
-                            </div>
-
-                            <div class="invalid-feedback">
-                                Please provide the full name of the author.
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-info">Create Book</button>
-                            <a href="@Url.Action("Index", "Author")" class="btn btn-outline-info">Back to List</a>
-                        </div>
-                    </form>
+                    <!-- Submit Button -->
+                    <div class="form-group text-center">
+                        <button type="submit" class="btn btn-primary w-100">Create Book</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
+
+<div class="text-center mt-3">
+    <a asp-action="Index" class="btn btn-link">Back to List</a>
+</div>
+@section Scripts {
+   
+    <partial name="_Validation" />
+
+
+}

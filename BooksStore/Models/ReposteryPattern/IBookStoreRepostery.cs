@@ -11,6 +11,8 @@
         void Update(int Id,TEntity entity);
         void Delete(int id);
 
+        List<TEntity> Search(string term);
+
 
     }
 }

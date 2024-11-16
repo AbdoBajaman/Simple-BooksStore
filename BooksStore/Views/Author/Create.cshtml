@@ -3,35 +3,30 @@
 @{
     ViewData["Title"] = "Create Author";
 }
-@*<head>     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-</head>*@
-<h1 class="text-center mb-4">Create Author</h1>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title">Author Details</h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Create" method="post">
-                        <div asp-validation-summary="ModelOnly" class="Text-Danger"> </div>
-                        <div class="form-group mb-3">
-                            <label for="FullName" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="FullName" name="FullName" required />
-                            <span asp-validation-for="FullName" class="Text-Danger" > </span>
-                            <div class="invalid-feedback">
-                                Please provide the full name of the author.
-                            </div>
-                        </div>
+<h2 class="text-center mb-4">Create Author</h2>
 
-                        <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-info">Create Author</button>
-                            <a href="@Url.Action("Index", "Author")" class="btn btn-outline-info">Back to List</a>
-                        </div>
-                    </form>
-                </div>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title">Author Information</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="form-group">
+                        <label asp-for="FullName" class="control-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" placeholder="Enter full name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <input type="submit" value="Create Author" class="btn btn-success" />
+                        <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
